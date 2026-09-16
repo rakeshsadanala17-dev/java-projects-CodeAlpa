@@ -1,0 +1,130 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+
+public class SimpleChatbot extends JFrame {
+    private JTextArea chatArea;
+    private JTextField inputField;
+    private JButton sendButton;
+    private Map<String, String> knowledgeBase;
+
+    public SimpleChatbot() {
+        // Setup Window Title and Layout
+        setTitle("AI Java Chatbot");
+        setSize(450, 550);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        // Initialize Knowledge Base (FAQ Training Data)
+        initKnowledgeBase();
+
+        // Chat Text Area (Scrollable)
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        chatArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(chatArea);
+
+        // Input Field and Send Button Panel
+        inputField = new JTextField();
+        inputField.setFont(new Font("Arial", Font.PLAIN, 14));
+        
+        sendButton = new JButton("Send");
+        sendButton.setBackground(new Color(70, 130, 180));
+        sendButton.setForeground(Color.WHITE);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(inputField, BorderLayout.CENTER);
+        bottomPanel.add(sendButton, BorderLayout.EAST);
+
+        // Add components to frame
+        add(scrollPane, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Event Listeners for Interaction
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                processUserMessage();
+            }
+        });
+
+        inputField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                processUserMessage();
+            }
+        });
+
+        // Welcome Message
+        chatArea.append("Bot: Hello! I am your FAQ assistant. Ask me anything or type 'help'.\n\n");
+    }
+
+    // Populate FAQs (Rule-based NLP matching)
+    private void initKnowledgeBase() {
+        knowledgeBase = new HashMap<>();
+        knowledgeBase.put("hello", "Hi there! How can I help you today?");
+        knowledgeBase.put("hi", "Hello! What can I assist you with?");
+        knowledgeBase.put("how are you", "I am just a computer program, but I am doing great! How about you?");
+        knowledgeBase.put("what is your name", "I am a Java-based AI Chatbot.");
+        knowledgeBase.put("help", "You can ask me about: hours, location, pricing, contact, or Java.");
+        knowledgeBase.put("hours", "We are open Monday to Friday, 9:00 AM to 5:00 PM.");
+        knowledgeBase.put("location", "We are based in cyberspace, accessible from anywhere!");
+        knowledgeBase.put("pricing", "Our basic tier is free, and premium features start at $10/month.");
+        knowledgeBase.put("contact", "You can reach support via email at support@example.com.");
+        knowledgeBase.put("java", "Java is a high-class, object-oriented programming language.");
+        knowledgeBase.put("bye", "Goodbye! Have a wonderful day.");
+    }
+
+    // NLP / Rule-based response generation logic
+    private String getBotResponse(String input) {
+        // Clean and normalize text (basic NLP tokenization/preprocessing)
+        String cleanInput = input.toLowerCase().trim();
+
+        // Direct lookup
+        if (knowledgeBase.containsKey(cleanInput)) {
+            return knowledgeBase.get(cleanInput);
+        }
+
+        // Partial matching fallback (Rule-based keyword search)
+        for (Map.Entry<String, String> entry : knowledgeBase.entrySet()) {
+            if (cleanInput.contains(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+
+        return "I'm sorry, I don't understand that. Type 'help' to see what I know.";
+    }
+
+    // Handle message sending and UI update
+    private void processUserMessage() {
+        String userText = inputField.getText().trim();
+        if (userText.isEmpty()) {
+            return;
+        }
+
+        chatArea.append("You: " + userText + "\n");
+        inputField.setText("");
+
+        // Generate response
+        String botResponse = getBotResponse(userText);
+        chatArea.append("Bot: " + botResponse + "\n\n");
+        
+        // Auto-scroll to bottom
+        chatArea.setCaretPosition(chatArea.getDocument().getLength());
+    }
+
+    public static void main(String[] args) {
+        // Run GUI on Event Dispatch Thread
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new SimpleChatbot().setVisible(true);
+            }
+        });
+    }
+}
